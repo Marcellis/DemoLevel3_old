@@ -49,7 +49,7 @@ public class UpdateActivity extends AppCompatActivity {
                 //(reminderUpdate.setmReminderText(updatedReminderText)));
                 if (!TextUtils.isEmpty(updatedReminderText)){
 
-                    Toast.makeText(UpdateActivity.this, reminderUpdate+"updated to"+ updatedReminderText, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UpdateActivity.this, reminderUpdate+" updated to"+ updatedReminderText, Toast.LENGTH_SHORT).show();
                      finish();
                 } else {
                     Snackbar.make(view, "Enter some data", Snackbar.LENGTH_LONG)
