@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
 
 
     //Local variables
-    private List<Reminder> mReminders;
+    public static List<Reminder> mReminders;
     private ReminderAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private EditText mNewReminderText;
@@ -165,7 +165,14 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
     public void reminderOnClick(int i) {
         Intent intent = new Intent(MainActivity.this, UpdateActivity.class);
         intent.putExtra(REMINDER_POSITION, i);
-        startActivityForResult (intent, REQUESTCODE);
+        startActivity(intent);
 
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateUI();
     }
 }
