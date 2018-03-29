@@ -1,11 +1,13 @@
 package com.example.marmm.demolevel3;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -15,6 +17,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.parceler.Parcels;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,14 +37,16 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
 
 
     //Constants used when calling the update activity
-    public static final String REMINDER_POSITION = "Position";
+    public static final String EXTRA_NUMBER = "Row number";
+    public static final String EXTRA_REMINDER = "Reminder text";
     public static final int REQUESTCODE = 1234;
+    private int mModifyPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar =  findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
@@ -44,29 +54,22 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
         mReminders = new ArrayList<>();
 
 
+        if (getReminders("storeReminders") != null)
+            mReminders = getReminders("storeReminders");
+        else
+            mReminders = new ArrayList<>();
+
         //Initialize the local variables
 
         mRecyclerView = findViewById(R.id.recyclerView);
-//        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-
+//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
 
         updateUI();
-/*
 
-            mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                return true;
-            }
-        });
-
-*/
-
-        FloatingActionButton fab =  findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -129,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
         } else {
             mAdapter.notifyDataSetChanged();
         }
+        saveReminders(mReminders, "storeReminders");
     }
 
 
@@ -156,18 +160,11 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
 
 
     @Override
-    public void reminderOnLongClick(int i) {
-        mReminders.remove(i);
-        updateUI();
-    }
-
-    @Override
     public void reminderOnClick(int i) {
         Intent intent = new Intent(MainActivity.this, UpdateActivity.class);
-        intent.putExtra(REMINDER_POSITION, i);
-        startActivity(intent);
-
-
+        mModifyPosition = i;
+        intent.putExtra(EXTRA_REMINDER,  mReminders.get(i));
+        startActivityForResult(intent, REQUESTCODE);
     }
 
     @Override
@@ -175,4 +172,36 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
         super.onResume();
         updateUI();
     }
+
+    public void saveReminders(List<Reminder> reminders, String key) {
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(reminders);
+        editor.putString(key, json);
+        editor.apply();
+    }
+
+    public List<Reminder> getReminders(String key) {
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPref.getString(key, null);
+        Type type = new TypeToken<List<Reminder>>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == REQUESTCODE) {
+            if (resultCode == RESULT_OK) {
+                Reminder updatedReminder = data.getParcelableExtra(MainActivity.EXTRA_REMINDER);
+                // New timestamp: timestamp of update
+                mReminders.set(mModifyPosition, updatedReminder);
+                updateUI();
+            }
+        }
+    }
+
 }

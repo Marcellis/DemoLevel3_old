@@ -20,8 +20,7 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.ViewHo
 
 
     public interface ReminderClickListener{
-        void reminderOnLongClick (int i);
-        void reminderOnClick (int i);
+           void reminderOnClick (int i);
     }
 
 
@@ -54,25 +53,17 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.ViewHo
         return mReminders.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements  View.OnClickListener{
         public TextView textView;
 
         public ViewHolder(View itemView) {
 
             super(itemView);
             textView=  itemView.findViewById(android.R.id.text1);
-            itemView.setOnLongClickListener(this);
             itemView.setOnClickListener(this);
         }
 
-        @Override
-        public boolean onLongClick(View view) {
-            int clickedPosition = getAdapterPosition();
-            mReminderClickListener.reminderOnLongClick(clickedPosition);
-            return true;
-        }
-
-        @Override
+             @Override
         public void onClick(View view) {
             int clickedPosition = getAdapterPosition();
             mReminderClickListener.reminderOnClick(clickedPosition);
