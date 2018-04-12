@@ -20,8 +20,6 @@ import android.widget.EditText;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.parceler.Parcels;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,12 +52,7 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
         mReminders = new ArrayList<>();
 
 
-        if (getReminders("storeReminders") != null)
-            mReminders = getReminders("storeReminders");
-        else
-            mReminders = new ArrayList<>();
-
-        //Initialize the local variables
+            //Initialize the local variables
 
         mRecyclerView = findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -132,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
         } else {
             mAdapter.notifyDataSetChanged();
         }
-        saveReminders(mReminders, "storeReminders");
+
     }
 
 
@@ -163,40 +156,18 @@ public class MainActivity extends AppCompatActivity implements ReminderAdapter.R
     public void reminderOnClick(int i) {
         Intent intent = new Intent(MainActivity.this, UpdateActivity.class);
         mModifyPosition = i;
-        intent.putExtra(EXTRA_REMINDER,  mReminders.get(i));
+        intent.putExtra(EXTRA_REMINDER,  mReminders.get(i).getmReminderText());
         startActivityForResult(intent, REQUESTCODE);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        updateUI();
-    }
 
-    public void saveReminders(List<Reminder> reminders, String key) {
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(reminders);
-        editor.putString(key, json);
-        editor.apply();
-    }
-
-    public List<Reminder> getReminders(String key) {
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPref.getString(key, null);
-        Type type = new TypeToken<List<Reminder>>() {
-        }.getType();
-        return gson.fromJson(json, type);
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == REQUESTCODE) {
             if (resultCode == RESULT_OK) {
-                Reminder updatedReminder = data.getParcelableExtra(MainActivity.EXTRA_REMINDER);
+                Reminder updatedReminder = new Reminder (data.getStringExtra(MainActivity.EXTRA_REMINDER));
                 // New timestamp: timestamp of update
                 mReminders.set(mModifyPosition, updatedReminder);
                 updateUI();

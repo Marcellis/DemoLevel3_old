@@ -15,7 +15,6 @@ import android.widget.EditText;
 public class UpdateActivity extends AppCompatActivity {
 
     private EditText mReminderView;
-    private int mPosInArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +27,8 @@ public class UpdateActivity extends AppCompatActivity {
         mReminderView = findViewById(R.id.editText_update);
 
         //Obtain the parameters provided by MainActivity
-        final Reminder reminderUpdate = getIntent().getParcelableExtra(MainActivity.EXTRA_REMINDER);
-        mPosInArray =  getIntent().getIntExtra(MainActivity.EXTRA_NUMBER, -1);
-        mReminderView.setText(reminderUpdate.getmReminderText());
+        final String reminderUpdate = getIntent().getStringExtra(MainActivity.EXTRA_REMINDER);
+        mReminderView.setText(reminderUpdate);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -41,10 +39,10 @@ public class UpdateActivity extends AppCompatActivity {
 
                 //(reminderUpdate.setmReminderText(updatedReminderText)));
                 if (!TextUtils.isEmpty(text)) {
-                    reminderUpdate.setmReminderText(text);
+
                     //Prepare the return parameter and return
                     Intent resultIntent = new Intent();
-                    resultIntent.putExtra(MainActivity.EXTRA_REMINDER, reminderUpdate);
+                    resultIntent.putExtra(MainActivity.EXTRA_REMINDER, text);
                     setResult(Activity.RESULT_OK, resultIntent);
                     finish();
                 } else {
